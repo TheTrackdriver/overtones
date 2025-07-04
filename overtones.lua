@@ -360,7 +360,7 @@ function draw_morphStart()
       screen.level(2)
   end
   screen.move(100,9)
-  screen.text("s: "..round(params:get("morphStart"), 1))
+  screen.text("s: "..round(params:get("morphStart") + 1, 1))
 end
 
 function draw_morphEnd()
@@ -370,7 +370,7 @@ function draw_morphEnd()
       screen.level(2)
   end
   screen.move(100,23)
-  screen.text("e: "..round(params:get("morphEnd"), 1))
+  screen.text("e: "..round(params:get("morphEnd") + 1, 1))
 end
 
 function draw_morphMixVal()
