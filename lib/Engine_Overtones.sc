@@ -1,6 +1,6 @@
 Engine_Overtones : CroneEngine {
 
-	classvar maxNumVoices = 10;
+	classvar maxNumVoices = 8;
 	var voiceGroup;
 	var voiceList;
 
@@ -314,7 +314,7 @@ Engine_Overtones : CroneEngine {
 			voiceGroup.set(\panrate, panrate);
 		});
 
-		this.addCommand(\pitchmod, "i", { arg msg;
+		this.addCommand(\pitchmod, "f", { arg msg;
 			pitchmod = msg[1];
 			voiceGroup.set(\pitchmod, pitchmod);
 		});
