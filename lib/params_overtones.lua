@@ -4,50 +4,55 @@ local Formatters = require 'formatters'
 
 function Overtones.add_params()
   params:add_separator("envelope")
-  params:add_control("amp", "main level", controlspec.new(0 , 1, 'lin', 0 , 0.75, ''))
+  params:add_control("amp", "main level", controlspec.new(0 , 1, 'lin', 0 , 0.57, ''))
   params:set_action("amp", function(x) engine.amp(x) end)
-  params:add_control("attack", "attack", controlspec.new(0.01, 10, 'exp', 0, 0.01, 's'))
+  params:add_control("attack", "attack", controlspec.new(0.01, 10, 'lin', 0, 0.01, 's'))
   params:set_action("attack", function(x) engine.attack(x) end)
-  params:add_control("decay", "decay", controlspec.new(0.1, 10, 'exp', 0, 0.3, 's'))
+  params:add_control("decay", "decay", controlspec.new(0.1, 10, 'lin', 0, 0.3, 's'))
   params:set_action("decay", function(x) engine.decay(x) end)
   params:add_control("sustain", "sustain", controlspec.new(0, 1, 'lin', 0, 0.7, ''))
   params:set_action("sustain", function(x) engine.sustain(x) end)
-  params:add_control("release", "release", controlspec.new(0.1, 10, 'exp', 0, 3, 's'))
+  params:add_control("release", "release", controlspec.new(0.1, 10, 'lin', 0, 3, 's'))
   params:set_action("release", function(x) engine.release(x) end)
   
   params:add_separator("morph")
-  params:add_control("morphMixVal", "lin>rand", controlspec.new(0 , 1, 'lin', 0 , 0, ''))
+  params:add_control("morphMixVal", "lfo>rnd>env", controlspec.new(0 , 2, 'lin', 0 , 0, ''))
   params:set_action("morphMixVal", function(x) engine.morphMixVal(x) end)
-  params:add_control("morphRate", "morph rate", controlspec.new(0.1 , 20, 'exp', 0 , 4, 's'))
+  params:add_control("morphRate", "morph rate", controlspec.new(0.1 , 20, 'lin', 0 , 4, 's'))
   params:set_action("morphRate", function(x) engine.morphRate(x) end)
   params:add_control("morphStart", "morph start", controlspec.new(0, 3, 'lin', 0, 0, ''))
   params:set_action("morphStart", function(x) engine.morphStart(x) end)
-  params:add_control("morphEnd", "morph end", controlspec.new(0, 3, 'lin', 0, 3, ''))
+  params:add_control("morphEnd", "morph end", controlspec.new(0, 3, 'lin', 0, 0, ''))
   params:set_action("morphEnd", function(x) engine.morphEnd(x) end)
   
   params:add_separator("modulation")
   params:add_control("panwidth", "pan mod width", controlspec.new(0, 1, 'lin', 0, 0, ''))
   params:set_action("panwidth", function(x) engine.panwidth(x) end)
-  params:add_control("panrate", "pan mod rate", controlspec.new(0.1, 20, 'exp', 0, 8, ''))
+  params:add_control("panrate", "pan mod rate", controlspec.new(0.1, 20, 'lin', 0, 8, ''))
   params:set_action("panrate", function(x) engine.panrate(x) end)
-  params:add_control("pitchmod", "pitch mod depth", controlspec.new(0, 26, 'lin', 1, 0, 'hz'))
+  params:add_control("pitchmod", "pitch mod depth", controlspec.new(0, 26, 'lin', 0, 0, 'hz'))
   params:set_action("pitchmod", function(x) engine.pitchmod(x) end)
-  params:add_control("pitchrate", "pitch mod rate", controlspec.new(0.1, 20, 'exp', 0, 4, ''))
+  params:add_control("pitchrate", "pitch mod rate", controlspec.new(0.1, 20, 'lin', 0, 4, ''))
   params:set_action("pitchrate", function(x) engine.pitchrate(x) end)
   
   params:add_separator("partials")
-  params:add_control("s11", "s11", controlspec.new(0, 1, 'lin', 0, 1, ''))
+  params:add_group("partialsgroup", "partials", 36)
+  params:add_separator("snapshot [1]")
+  params:add_control("s11", "[1] partial 1", controlspec.new(0, 1, 'lin', 0, 1, ''))
   for i = 2,8 do
-    params:add_control("s1"..i, "s1"..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
+    params:add_control("s1"..i, "[1] partial "..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
   end
+  params:add_separator("snapshot [2]")
   for i = 1,8 do
-    params:add_control("s2"..i, "s2"..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
+    params:add_control("s2"..i, "[2] partial "..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
   end
+  params:add_separator("snapshot [3]")
   for i = 1,8 do
-    params:add_control("s3"..i, "s3"..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
+    params:add_control("s3"..i, "[3] partial "..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
   end
+  params:add_separator("snapshot [4]")
   for i = 1,8 do
-    params:add_control("s4"..i, "s4"..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
+    params:add_control("s4"..i, "[4] partial "..i, controlspec.new(0, 1, 'lin', 0, 0, ''))
   end
   
   params:set_action("s11", function(x) engine.s11(x) end)

@@ -5,7 +5,6 @@ Engine_Overtones : CroneEngine {
 	var voiceList;
 
 	var lastFreq = 0;
-
 	var freq = 220;
 	var attack = 0.01;
 	var decay = 0.3;
@@ -68,80 +67,96 @@ Engine_Overtones : CroneEngine {
 		// Synth voice
 		SynthDef("Overtones", {
 
-	arg freq = 220,
-	attack = 0.01,
-	decay = 0.3,
-	sustain = 0.7,
-	release = 5,
-	s11 = 1, s12 = 0, s13 = 0, s14 = 0, s15 = 0, s16 = 0, s17 = 0, s18 = 0,
-	s21 = 0, s22 = 0, s23 = 1, s24 = 0, s25 = 0, s26 = 0, s27 = 0, s28 = 0,
-	s31 = 0, s32 = 0, s33 = 0, s34 = 0, s35 = 1, s36 = 0, s37 = 0, s38 = 0,
-	s41 = 0, s42 = 0, s43 = 0, s44 = 0, s45 = 0, s46 = 0, s47 = 1, s48 = 0,
-	morphMixVal = 0,
-	morphRate = 2,
-	morphStart = 0,
-	morphEnd = 3,
-	pitchmod = 0,
-	pitchrate = 4,
-	panwidth = 1,
-	panrate = 8,
-	gate = 1,
-	amp = 0.75;
+			arg freq = 220,
+			attack = 0.01,
+			decay = 0.3,
+			sustain = 0.7,
+			release = 5,
+			s11 = 1, s12 = 0, s13 = 0, s14 = 0, s15 = 0, s16 = 0, s17 = 0, s18 = 0,
+			s21 = 0, s22 = 0, s23 = 1, s24 = 0, s25 = 0, s26 = 0, s27 = 0, s28 = 0,
+			s31 = 0, s32 = 0, s33 = 0, s34 = 0, s35 = 1, s36 = 0, s37 = 0, s38 = 0,
+			s41 = 0, s42 = 0, s43 = 0, s44 = 0, s45 = 0, s46 = 0, s47 = 1, s48 = 0,
+			morphMixVal = 0,
+			morphRate = 2,
+			morphStart = 0,
+			morphEnd = 3,
+			pitchmod = 0,
+			pitchrate = 4,
+			panwidth = 1,
+			panrate = 8,
+			gate = 1,
+			vel = 1,
+			amp = 0.75;
 
-	var sinebank = 0,
-	saw,
-	oscPresets,
-	oscPresets1,
-	oscPresets2,
-	oscPresets3,
-	oscPresets4,
-	oscPresets5,
-	oscPresets6,
-	oscPresets7,
-	oscPresets8,
-	envelope,
-	signal;
+			var sinebank = 0,
+			oscPresets,
+			oscPresets1,
+			oscPresets2,
+			oscPresets3,
+			oscPresets4,
+			oscPresets5,
+			oscPresets6,
+			oscPresets7,
+			oscPresets8,
+			ampMorph,
+			ampMorph1,
+			ampMorph2,
+			ampMorph3,
+			ampMorph4,
+			ampMorph5,
+			ampMorph6,
+			ampMorph7,
+			ampMorph8,
+			morphLfo,
+			morphRand,
+			morphEnv,
+			clippedMorph,
+			morphMix,
+			envelope,
+			signal;
 
-	// 8 arrays with 4 elements. The elements store a value controlling one oscillators volume:
-	oscPresets1 = [ s11, s21, s31, s41 ];
-	oscPresets2 = [ s12, s22, s32, s42 ];
-	oscPresets3 = [ s13, s23, s33, s43 ];
-	oscPresets4 = [ s14, s24, s34, s44 ];
-	oscPresets5 = [ s15, s25, s35, s45 ];
-	oscPresets6 = [ s16, s26, s36, s46 ];
-	oscPresets7 = [ s17, s27, s37, s47 ];
-	oscPresets8 = [ s18, s28, s38, s48 ];
+			// 8 arrays with 4 elements. The elements are snapshots of a value controlling one oscillators volume.
+			// The arrays are then collected in a new array:
+			oscPresets1 = [ s11, s21, s31, s41 ];
+			oscPresets2 = [ s12, s22, s32, s42 ];
+			oscPresets3 = [ s13, s23, s33, s43 ];
+			oscPresets4 = [ s14, s24, s34, s44 ];
+			oscPresets5 = [ s15, s25, s35, s45 ];
+			oscPresets6 = [ s16, s26, s36, s46 ];
+			oscPresets7 = [ s17, s27, s37, s47 ];
+			oscPresets8 = [ s18, s28, s38, s48 ];
+			oscPresets = [ oscPresets1, oscPresets2, oscPresets3, oscPresets4, oscPresets5, oscPresets6, oscPresets7, oscPresets8 ];
 
-	oscPresets = [ oscPresets1, oscPresets2, oscPresets3, oscPresets4, oscPresets5, oscPresets6, oscPresets7, oscPresets8 ];
+			// Partial volume controls, one for each partial:
+			ampMorph = [ ampMorph1, ampMorph2, ampMorph3, ampMorph4, ampMorph5, ampMorph6, ampMorph7, ampMorph8 ];
 
-	8.do{
-		arg i;
-		var sine, morphLfo, clippedMorph, morphRand, morphMix, ampMorph, ampMorph1, ampMorph2, ampMorph3, ampMorph4, ampMorph5, ampMorph6, ampMorph7, ampMorph8;
+			// 3 types of morphing:
+			morphLfo = LFTri.kr( freq: 1 / morphRate, iphase: 3, mul: 1.0 ).range(morphStart, morphEnd );
+			morphRand = LFNoise1.kr( 4 /morphRate ).range( morphStart, morphEnd );
+			morphEnv = EnvGen.kr( Env.adsr( attackTime: 0.01, decayTime: morphRate, sustainLevel: 0, releaseTime: release ).range( morphEnd, morphStart ), gate: gate, doneAction: 2 );
 
-		// Partial amp envelopes:
-		ampMorph = [ ampMorph1, ampMorph2, ampMorph3, ampMorph4, ampMorph5, ampMorph6, ampMorph7, ampMorph8 ];
+			// A mix parameter that allows choosing the type of morphing. The mix goes from lfo>random>env:
+			morphMix = LinSelectX.kr( morphMixVal, [morphLfo, morphRand, morphEnv] );
+			clippedMorph = morphMix.clip( 0, oscPresets.size - 1 );
 
-		// Morph the presets. There is a mix parameter that goes from linear to random morphing:
-		morphLfo = LFTri.kr( freq: 1 / morphRate, iphase: 3, mul: 1.0 ).range (morphStart, morphEnd );
-		morphRand = LFNoise1.kr( 4 / morphRate  ).range( morphStart, morphEnd );
-		morphMix = LinSelectX.kr( morphMixVal, [ morphLfo, morphRand ] );
-		clippedMorph = morphMix.clip( 0, oscPresets.size - 1 );
-		ampMorph[i] = LinSelectX.kr( clippedMorph, oscPresets[i] );
+			8.do{
+				arg i;
+				var sine;
 
-		//Sinebank with 8 oscillators:
-		sine = Pan2.ar(SinOsc.ar( freq: ( freq * ( i + 1 ) ) + LFNoise1.kr(pitchrate).range(pitchmod * -1, pitchmod) ,mul: ampMorph[i] ), LFNoise1.kr(panrate).range(panwidth * -1, panwidth * 1 ) );
-		sinebank = sinebank + sine;
-	};
+				// Morph up to four snapshots inside every oscPreset:
+				ampMorph[i] = LinSelectX.kr( clippedMorph, oscPresets[i] );
 
-	// Envelope modulating the main volume:
-	envelope = EnvGen.kr(Env.adsr( attackTime: attack, decayTime: decay, sustainLevel: sustain, releaseTime: release ), gate: gate, doneAction: 2 );
-	signal = sinebank * envelope;
-	Out.ar( 0, signal * ( amp * 0.25 ) );
+				//Sinebank with 8 oscillators:
+				sine = Pan2.ar(SinOsc.ar( freq: ( freq * ( i + 1 ) ) + LFNoise1.kr(pitchrate).range(pitchmod * -1, pitchmod) ,mul: ampMorph[i] ), LFNoise1.kr(panrate).range(panwidth * -1, panwidth * 1 ) );
+				sinebank = sinebank + sine;
+			};
 
-		}).add;
+			// Envelope modulating the main volume:
+			envelope = EnvGen.kr(Env.adsr( attackTime: attack, decayTime: decay, sustainLevel: sustain, releaseTime: release ), gate: gate, doneAction: 2 );
+			signal = (sinebank * envelope) * vel;
+			Out.ar( 0, signal * ( amp * 0.2 ) );
 
-//}).play(target:context.xg, args: [\in, mixerBus, \out, context.out_b], addAction: \addToTail);
-
+	}).add;
 
 		// Commands
 
@@ -217,7 +232,7 @@ Engine_Overtones : CroneEngine {
 					\pitchrate, pitchrate,
 					\panwidth, panwidth,
 					\panrate, panrate,
-					\vel, vel.linlin(0, 1, 0.3, 1),
+					\vel, vel.linlin(0, 1, 0.2, 1),
 					\amp, amp;
 
 				], target: voiceGroup).onFree({ voiceList.remove(newVoice); }), gate: 1);
@@ -233,29 +248,6 @@ Engine_Overtones : CroneEngine {
 				voice.theSynth.set(\gate, 0);
 				voice.gate = 0;
 			});
-		});
-
-		// noteOffAll()
-		this.addCommand(\noteOffAll, "", { arg msg;
-			voiceGroup.set(\gate, 0);
-			voiceList.do({ arg v; v.gate = 0; });
-		});
-
-		// noteKill(id)
-		this.addCommand(\noteKill, "i", { arg msg;
-			var voice = voiceList.detect{arg v; v.id == msg[1]};
-			if(voice.notNil, {
-				voice.theSynth.set(\gate, 0);
-				voice.theSynth.set(\killGate, 0);
-				voiceList.remove(voice);
-			});
-		});
-
-		// noteKillAll()
-		this.addCommand(\noteKillAll, "", { arg msg;
-			voiceGroup.set(\gate, 0);
-			voiceGroup.set(\killGate, 0);
-			voiceList.clear;
 		});
 
 		//synth parameters
