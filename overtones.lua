@@ -8,10 +8,10 @@
 -- while playing.
 -- 
 -- k2 and k3 steps through
--- four sections.
+-- five sections.
 --
 -- section 1
---   e1: slot selection
+--   e1: snapshot selection
 --   e2: partial selection
 --   e3: partial level
 --   k1+k2: copy snapshot
@@ -19,8 +19,18 @@
 --
 -- section 2, 3 and 4
 --   e1: main level
---   e2: Parameter selection
---   e3: Parameter control
+--   e2: parameter selection
+--   e3: parameter control
+--
+-- section 5 (for evaluation)
+--   e1: snapshot selection
+--   e2: partial selection
+--   e3: partial level
+--   k1+k2: copy snapshot
+--   k1+k3: paste snapshot
+--
+-- midi device and midi channel
+-- can be set in parameters>edit
 --
 --
 --
@@ -28,7 +38,7 @@
 --
 --
 --
--- press K3...
+-- press k3...
 
 engine.name = 'Overtones'
 overtones_setup = include('lib/params_overtones')
@@ -38,30 +48,86 @@ music = require 'musicutil'
 local popup_timer = nil
 gridpage = {"grid page 1", "grid page 2", "grid page 3"}
 copy_snapshot = {}
+local midi_device = {}
+local midi_device_names = {}
+local device_number = 1
+local midi_in_channels = {}
+local sustain_down = false
+local sustained_notes = {}
+local idle_level = 4
+local inactive_level = 1
 
 g = grid.connect()
-m = midi.connect()
 
 --//////////////////////////////////////////////////////--
 ---------- MIDI ------------------------------------------
 --//////////////////////////////////////////////////////--
 
-local function note_on(note_id, note_num, vel)
+local function midi_params()
+  params:add_separator("midi")
+  params:add_option("midi target", "midi in", midi_device_names, 1)
+  params:set_action("midi target", function(x) device_number = x set_midi_event_handler() end)
+  params:add_option("midi in channel", "midi in channel", midi_in_channels, 1)
+  params:set_action("midi in channel", function(x) midi_in_channel = x set_midi_event_handler() end)
+end
+
+local function get_midi_device()
+  for i = 1,#midi.vports do
+    midi_device[i] = midi.connect(i)
+    table.insert(midi_device_names, i..": "..util.trim_string_to_width(midi_device[i].name, 80))
+  end
+end
+
+local function set_midi_in_channel()
+  for i = 1, 16 do
+    table.insert(midi_in_channels, i)
+  end
+end
+
+function set_midi_event_handler()
+  for i, dev in pairs(midi_device) do
+    dev.event = nil
+  end
+
+  if midi_device[device_number] then
+    midi_device[device_number].event = function(data)
+      local msg = midi.to_msg(data)
+      if msg.ch == midi_in_channel then
+        if msg.type == "note_on" and msg.vel > 0 then
+          note_on(msg.note, msg.note, msg.vel / 127)
+        elseif msg.type == "note_off" or (msg.type == "note_on" and msg.vel == 0) then
+          note_off(msg.note, msg.note)
+        elseif msg.type == "cc" then
+          if msg.cc == 64 then
+            sustain_pedal(msg.val)
+          end
+        end
+      end
+    end
+  end
+end
+
+function note_on(note_id, note_num, vel)
   engine.noteOn(note_id, music.note_num_to_freq(note_num), vel)
 end
 
-local function note_off(note_id)
-  engine.noteOff(note_id)
+function note_off(note_id)
+  if sustain_down then
+    table.insert(sustained_notes, note_id)
+  else
+    engine.noteOff(note_id)
+  end
 end
 
-m.event = function(data)
-  local msg = midi.to_msg(data)
-
-  if msg.type == "note_on" and msg.vel > 0 then
-    note_on(msg.note, msg.note, msg.vel / 127)
-
-  elseif msg.type == "note_off" or (msg.type == "note_on" and msg.vel == 0) then
-    note_off(msg.note, msg.note)
+function sustain_pedal(val)
+  if val >= 64 then
+    sustain_down = true
+  else
+    sustain_down = false
+    for _, note in ipairs(sustained_notes) do
+      note_off(note)
+    end
+    sustained_notes = {}
   end
 end
 
@@ -73,6 +139,12 @@ function init()
   overtones_setup.add_params()
   norns.enc.sens(1,10)
   norns.enc.sens(2,10)
+  get_midi_device()
+  set_midi_in_channel()
+  midi_params()
+  device_number = 1
+  midi_in_channel = 1
+  set_midi_event_handler()
   parm_selection = 1
   slot_selection = 1
   key1_down = false
@@ -83,6 +155,14 @@ function init()
   ramp_speed = 0.15
   redraw()
   grid_redraw()
+
+  params.action_read = function(filename)
+  clock.run(function()
+    clock.sleep(0.1)
+    grid_redraw()
+    redraw()
+  end)
+  end
 end
 
 --//////////////////////////////////////////////////////--
@@ -104,7 +184,7 @@ function round(number, decimals)
     return math.floor(number * power) / power
 end
 
--- Grid popup window -------------------------------------
+-- Popup window ------------------------------------------
 function show_popup_window(message)
   show_popup = true
   popup_message = message or ""
@@ -115,21 +195,26 @@ function show_popup_window(message)
   end
 
   popup_timer = clock.run(function()
-    clock.sleep(1)
+    clock.sleep(1.5)
     show_popup = false
     redraw()
   end)
-
   redraw()
 end
 
--- Grid popup content ------------------------------------
+-- Popup parameter ---------------------------------------
 function show_param_popup(param_id)
   local val = round(params:get(param_id), 2)
   local def = params:lookup_param(param_id)
-  local txt = def.name .. ": " .. val
+  local txt = def.name..": "..val
   show_popup_window(txt)
 end
+
+-- Popup copy/paste --------------------------------------
+function show_copy_paste(copy_paste)
+  show_popup_window(copy_paste)
+end
+
 
 -- Slew for grid -----------------------------------------
 function ramp_param_to_value(param_id, current_y, target_y, grid_y_min, grid_y_max, val_min, val_max, ramp_speed)
@@ -165,14 +250,6 @@ function fine_tune_param(param_id, step_size)
   redraw()
 end
 
--- Print all stored partials -----------------------------
-function show_spectrum()
-  print("slot1:",params:get("s11"),params:get("s12"),params:get("s13"),params:get("s14"),params:get("s15"),params:get("s16"),params:get("s17"),params:get("s18"))
-  print("slot2:",params:get("s21"),params:get("s22"),params:get("s23"),params:get("s24"),params:get("s25"),params:get("s26"),params:get("s27"),params:get("s28"))
-  print("slot3:",params:get("s31"),params:get("s32"),params:get("s33"),params:get("s34"),params:get("s35"),params:get("s36"),params:get("s37"),params:get("s38"))
-  print("slot4:",params:get("s41"),params:get("s42"),params:get("s43"),params:get("s44"),params:get("s45"),params:get("s46"),params:get("s47"),params:get("s48"))
-end
-
 --//////////////////////////////////////////////////////--
 ---------- KEYS & ENCODERS -------------------------------
 --//////////////////////////////////////////////////////--
@@ -186,34 +263,34 @@ function key(n,z)
   
   if n == 2 and z == 1 then
     if key1_down then
-      print("copy")
-      if page == 1 then
+      if page == 1 or page == 5 then
+        local copy_paste = "snapshot copied"
         for i = 1,8 do
           copy_snapshot[i] = params:get("s"..slot_selection..i)
         end
+        show_copy_paste(copy_paste)
       end
       else
-        page = clamp(page - z, 1, 4)
+        page = clamp(page - z, 1, 5)
         slot_selection = 1
         parm_selection = 1
-        print("page: "..page)
-        print("key2")
     end
   end
   
   if n == 3 and z == 1 then
     if key1_down then
-      print("paste")
-      if page == 1 then
-        for i = 1,8 do
-          params:set("s"..slot_selection..i, copy_snapshot[i])
+      if page == 1 or page == 5 then
+        if #copy_snapshot > 0 then
+          local copy_paste = "snapshot pasted"
+          for i = 1,8 do
+            params:set("s"..slot_selection..i, copy_snapshot[i])
+          end
+          show_copy_paste(copy_paste)
         end
       end
       else
-        page = clamp(page + z, 1, 4)
+        page = clamp(page + z, 1, 5)
         parm_selection = 1
-        print("page: "..page)
-        print("key3")
     end
   end
   grid_redraw()
@@ -221,7 +298,7 @@ function key(n,z)
 end
 
 function enc(n,d)
-  if page >= 2 then
+  if page >= 2 and page ~= 5 then
     local param_id = "amp"
     if n == 1 and d ~= 0 then
       params:delta(param_id, d)
@@ -229,10 +306,9 @@ function enc(n,d)
     end
   end
 
-  if page == 1 then
+  if page == 1 or page == 5 then
     if n == 1 then
       slot_selection = clamp(slot_selection + d, 1, 4)
-      print("slot: "..slot_selection)
 
     elseif n == 2 then
       parm_selection = clamp(parm_selection + d, 1, 8)
@@ -312,9 +388,14 @@ end
 ---------- GRAPHICS --------------------------------------
 --//////////////////////////////////////////////////////--
 
+----------------------------------------------------------
+-- REDRAW ------------------------------------------------
+----------------------------------------------------------
+
 function redraw()
   screen.clear()
-  
+
+-- Popup -------------------------------------------------
   if show_popup and popup_message then
     screen.level(0)
     screen.move(0,0)
@@ -329,144 +410,102 @@ function redraw()
     screen.blend_mode(9)
   end
 
+-- Pages -------------------------------------------------
   if page == 1 or page == 2 then
-    draw_bars()
-    draw_slots()
+    draw_partials()
     morph_range_arrows()
-    
-    draw_text_morphStart()
-    draw_text_morphEnd()
-    draw_text_morphMixVal()
-    draw_text_morphRate()
+    draw_text_1_2()
   end
   
   if page == 3 or page == 4 then
-    draw_text_attack()
-    draw_text_decay()
-    draw_text_sustain()
-    draw_text_release()
-    
-    draw_text_panwidth()
-    draw_text_panrate()
-    draw_text_pitchmod()
-    draw_text_pitchrate()
+    draw_text_3()
+    draw_text_4()
+  end
+  
+  if page == 5 then
+    draw_graphs()
+    draw_text_graph()
   end
   screen.update()
 end
 
-function draw_bars()
+----------------------------------------------------------
+-- PAGE 1 & 2 --------------------------------------------
+----------------------------------------------------------
+
+function draw_partials()
   screen.line_width(1)
+  local x = 69
+  local y = 4
+
+-- Bars --------------------------------------------------
   if page == 1 then
-      screen.level(15)
-      elseif page == 2 then
-        screen.level(1)
-      end
-      for parm_selection = 1,8 do
-        screen.move((parm_selection * 8) - 5, 62)
-        screen.line_rel(0, (params:get("s"..slot_selection..parm_selection) + 0.02) * -59)
-        screen.stroke()
-      end
-      
-      if page == 1 then
-        screen.level(15)
-      elseif page == 2 then
-        screen.level(0)
-      end
-      screen.line_width(1)
-      screen.move((parm_selection * 8) - 7,61)
-      screen.line_rel(0,3)
-      screen.line_rel(4,0)
-      screen.line_rel(0,-3)
-      screen.stroke()
-end
-    
-
-function draw_slots()
-  x = 68
-  y = 9
-  if page == 1 or page == 2 then
-    screen.line_width(1)
-    for i = 1,4 do
-      screen.level(1)
-      screen.move(x + 1, (i * 14) - 4)
-      screen.line_rel(4,0)
-      screen.line_rel(0,4)
-      screen.line_rel(-4,0)
-      screen.close()
-      screen.stroke()
-    end
-    
-    if slot_selection == 1 then
-      if page == 1 then
-      screen.level(15)
-      elseif page == 2 then
-        screen.level(1)
-      end
-      screen.move(x,y)
-      screen.line_rel(5,0)
-      screen.line_rel(0,5)
-      screen.line_rel(-5,0)
-      screen.close()
-      screen.fill()
-    end
-    
-    if slot_selection == 2 then
-      if page == 1 then
-      screen.level(15)
-      elseif page == 2 then
-        screen.level(1)
-      end
-      screen.move(x,y + 14)
-      screen.line_rel(5,0)
-      screen.line_rel(0,5)
-      screen.line_rel(-5,0)
-      screen.close()
-      screen.fill()
-    end
-
-    if slot_selection == 3 then
-      if page == 1 then
-      screen.level(15)
-      elseif page == 2 then
-        screen.level(1)
-      end
-      screen.move(x,y + 28)
-      screen.line_rel(5,0)
-      screen.line_rel(0,5)
-      screen.line_rel(-5,0)
-      screen.close()
-      screen.fill()
-    end
-    
-    if slot_selection == 4 then
-      if page == 1 then
-      screen.level(15)
-      elseif page == 2 then
-        screen.level(1)
-      end
-      screen.move(x,y + 42)
-      screen.line_rel(5,0)
-      screen.line_rel(0,5)
-      screen.line_rel(-5,0)
-      screen.close()
-      screen.fill()
-    end
+    screen.level(15)
+  elseif page == 2 then
+    screen.level(inactive_level)
   end
+  for parm_selection = 1,8 do
+    screen.move((parm_selection * 8) - 5, 62)
+    screen.line_rel(0, (params:get("s"..slot_selection..parm_selection) + 0.02) * -59)
+    screen.stroke()
+  end
+
+-- Bar selection -----------------------------------------
+  if page == 1 then
+    screen.level(15)
+  elseif page == 2 then
+    screen.level(0)
+  end
+  screen.move((parm_selection * 8) - 7,61)
+  screen.line_rel(0,3)
+  screen.line_rel(4,0)
+  screen.line_rel(0,-3)
+  screen.stroke()
+
+-- Snapshot slots ----------------------------------------
+  if page == 1 then
+    screen.level(idle_level)
+    else
+      screen.level(inactive_level)
+  end
+  
+  for i = 1,4 do
+    screen.move(x, (i * 14) - y)
+    screen.line_rel(4,0)
+    screen.line_rel(0,4)
+    screen.line_rel(-4,0)
+    screen.close()
+    screen.stroke()
+  end
+
+-- Snapshot selection ------------------------------------  
+  if page == 1 then  
+    screen.level(15)
+    else
+      screen.level(inactive_level)
+  end
+  screen.move(x - 1, (slot_selection * 14) - (y + 1))
+  screen.line_rel(5,0)
+  screen.line_rel(0,5)
+  screen.line_rel(-5,0)
+  screen.close()
+  screen.fill()
 end
 
+-- Morph arrows ------------------------------------------
 function morph_range_arrows()
-  xstart = 63
-  xend = xstart + 15
-  ystart = round(params:get("morphStart") * 14 + 8, 0)
-  yend = round(params:get("morphEnd") * 14 + 8, 0)
+  local xstart = 63
+  local xend = xstart + 15
+  local ystart = round(params:get("morphStart") * 14 + 8, 0)
+  local yend = round(params:get("morphEnd") * 14 + 8, 0)
 
   if page == 2 and parm_selection == 1 then
     screen.level(15)
     else
-      screen.level(3)
+      screen.level(inactive_level)
   end
   if page == 1 then
-    screen.level(1)
+    screen.level(inactive_level)
   end
   screen.move(xstart, ystart)
   screen.line_rel(3,3)
@@ -477,10 +516,10 @@ function morph_range_arrows()
   if page == 2 and parm_selection == 2 then
     screen.level(15)
     else
-      screen.level(3)
+      screen.level(inactive_level)
   end
   if page == 1 then
-    screen.level(1)
+    screen.level(inactive_level)
   end
   screen.move(xend, yend)
   screen.line_rel(-3,3)
@@ -489,168 +528,147 @@ function morph_range_arrows()
   screen.fill()
 end
 
+----------------------------------------------------------
+-- PAGE 5 ------------------------------------------------
+----------------------------------------------------------
+
+function draw_graphs()
+  local x = 20
+  local xofst = 20
+  local y = 32
+  local yofst = 8
+  local ymult = -21
+
+-- Graphs ------------------------------------------------
+  if page == 5 then
+    for slot_selection = 1,4 do
+      for parm_selection = 1,8 do
+        screen.level(math.floor(15 / parm_selection))
+        screen.move((parm_selection * 8) + (slot_selection * 20) - x, (parm_selection * -2) + (slot_selection * 8) + y)
+        screen.line_rel(0, (params:get("s"..slot_selection..parm_selection) + 0.05) * ymult)
+        screen.stroke()
+      end
+    end
+
+-- Graph selection ---------------------------------------
+    screen.level(math.floor(15 / parm_selection))
+    screen.move(((parm_selection * 8) - 21) + (slot_selection * xofst), math.floor(((32 - (params:get("s"..slot_selection..parm_selection) + 0.05) * -ymult) - (parm_selection * 2)) + (slot_selection * 8)))
+    screen.line_rel(2,0)
+    screen.line_rel(1,1)
+    screen.line_rel(0,1)
+    screen.line_rel(-2,2)
+    screen.line_rel(-1,0)
+    screen.line_rel(-1,-1)
+    screen.line_rel(0,-3)
+    screen.line_rel(1,-1)
+    screen.stroke()
+  end
+end
+
 --//////////////////////////////////////////////////////--
 ---------- TEXT ------------------------------------------
 --//////////////////////////////////////////////////////--
 
--- Morph -------------------------------------------------
-function draw_text_morphStart()
-  if page == 2 and parm_selection == 1 then
-    screen.level(15)
-    else
-      screen.level(3)
+----------------------------------------------------------
+-- PAGE 1 & 2 --------------------------------------------
+----------------------------------------------------------
+
+function draw_text_1_2()
+  local function text_1_2(param, value, x, y, parm_select)
+    local screen_level
+    if page == 1 then
+      screen_level = inactive_level
+    elseif page == 2 and parm_selection == parm_select then
+      screen_level = 15
+      else
+        screen_level = idle_level
+    end
+    screen.level(screen_level)
+    screen.move(x, y)
+    screen.text(param..value)
   end
-  if page == 1 then
-    screen.level(1)
-  end
-  screen.move(82,14)
-  screen.text("start: "..round(params:get("morphStart") + 1, 1))
+  
+  text_1_2("start: ", round(params:get("morphStart") + 1, 1), 82, 14, 1)
+  text_1_2("end: ", round(params:get("morphEnd") + 1, 1), 82, 28, 2)
+  text_1_2("l>r>e: ", round(params:get("morphMixVal") + 1, 1), 82, 42, 3)
+  text_1_2("rate:", round(params:get("morphRate"), 1), 82, 56, 4)
 end
 
-function draw_text_morphEnd()
-  if page == 2 and parm_selection == 2 then
-    screen.level(15)
-    else
-      screen.level(3)
+----------------------------------------------------------
+-- PAGE 3 ------------------------------------------------
+----------------------------------------------------------
+
+function draw_text_3()
+  local function text_3(param, value, x, y, parm_select)
+    local screen_level
+    if page == 4 then
+      screen_level = inactive_level
+    elseif page == 3 and parm_selection == parm_select then
+      screen_level = 15
+      else
+        screen_level = idle_level
+    end
+    screen.level(screen_level)
+    screen.move(x, y)
+    screen.text(param..value)
   end
-  if page == 1 then
-    screen.level(1)
-  end
-  screen.move(82,28)
-  screen.text("end: "..round(params:get("morphEnd") + 1, 1))
+  
+  text_3("att: ", round(params:get("attack"), 2), 3, 14, 1)
+  text_3("dec: ", round(params:get("decay"), 2), 3, 28, 2)
+  text_3("sus: ", round(params:get("sustain"), 1), 3, 42, 3)
+  text_3("rel: ", round(params:get("release"), 2), 3, 56, 4)
 end
 
-function draw_text_morphMixVal()
-  if page == 2 and parm_selection == 3 then
-    screen.level(15)
-    else
-      screen.level(3)
+----------------------------------------------------------
+-- PAGE 4 ------------------------------------------------
+----------------------------------------------------------
+
+function draw_text_4()
+  local function text_4(param, value, x, y, parm_select)
+    local screen_level
+    if page == 3 then
+      screen_level = inactive_level
+    elseif page == 4 and parm_selection == parm_select then
+      screen_level = 15
+      else
+        screen_level = idle_level
+    end
+    screen.level(screen_level)
+    screen.move(x, y)
+    screen.text(param..value)
   end
-  if page == 1 then
-    screen.level(1)
-  end
-  screen.move(82,42)
-  screen.text("l>r>e: "..round(params:get("morphMixVal") + 1, 1))
+  
+  text_4("width: ", round(params:get("panwidth"), 1), 82, 14, 1)
+  text_4("rate: ", round(params:get("panrate"), 1), 82, 28, 2)
+  text_4("w&f: ", round(params:get("pitchmod"), 1), 82, 42, 3)
+  text_4("rate: ", round(params:get("pitchrate"), 1), 82, 56, 4)
 end
 
-function draw_text_morphRate()
-  if page == 2 and parm_selection == 4 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 1 then
-    screen.level(1)
-  end
-  screen.move(82,56)
-  screen.text("rate:"..round(params:get("morphRate"), 1))
-end
+----------------------------------------------------------
+-- PAGE 5 ------------------------------------------------
+----------------------------------------------------------
 
--- Envelope ----------------------------------------------
-function draw_text_attack()
-  if page == 3 and parm_selection == 1 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 4 then
-    screen.level(1)
-  end
-  screen.move(2,14)
-  screen.text("att: "..round(params:get("attack"), 2))
-end
+function draw_text_graph()
 
-function draw_text_decay()
-  if page == 3 and parm_selection == 2 then
+-- Graph text --------------------------------------------
+  if page == 5 then
     screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 4 then
-    screen.level(1)
-  end
-  screen.move(2,28)
-  screen.text("dec: "..round(params:get("decay"), 2))
-end
+    screen.move(128,5)
+    screen.text_right("("..slot_selection..","..parm_selection..")")
+    screen.move(128,13)
+    screen.text_right(round(params:get("s"..slot_selection..parm_selection), 2))
 
-function draw_text_sustain()
-  if page == 3 and parm_selection == 3 then
-    screen.level(15)
-    else
-      screen.level(3)
+-- Snapshot selection ------------------------------------
+    for i = 1,4 do
+      if slot_selection == i then
+        screen.level(15)
+        else
+          screen.level(inactive_level)
+      end
+      screen.move((i * 20) - 20, (i * 8) + 32)
+      screen.text(i)
+    end
   end
-  if page == 4 then
-    screen.level(1)
-  end
-  screen.move(2,42)
-  screen.text("sus: "..round(params:get("sustain"), 1))
-end
-
-function draw_text_release()
-  if page == 3 and parm_selection == 4 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 4 then
-    screen.level(1)
-  end
-  screen.move(2,56)
-  screen.text("rel: "..round(params:get("release"), 2))
-end
-
--- Pan width modulation ----------------------------------
-function draw_text_panwidth()
-  if page == 4 and parm_selection == 1 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 3 then
-    screen.level(1)
-  end
-  screen.move(82,14)
-  screen.text("width: "..round(params:get("panwidth"), 1))
-end
-
-function draw_text_panrate()
-  if page == 4 and parm_selection == 2 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 3 then
-    screen.level(1)
-  end
-  screen.move(82,28)
-  screen.text("rate: "..round(params:get("panrate"), 1))
-end
-
--- Pitch modulation --------------------------------------
-function draw_text_pitchmod()
-  if page == 4 and parm_selection == 3 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 3 then
-    screen.level(1)
-  end
-  screen.move(82,42)
-  screen.text("w&f: "..round(params:get("pitchmod"), 1))
-end
-
-function draw_text_pitchrate()
-  if page == 4 and parm_selection == 4 then
-    screen.level(15)
-    else
-      screen.level(3)
-  end
-  if page == 3 then
-    screen.level(1)
-  end
-  screen.move(82,56)
-  screen.text("rate: "..round(params:get("pitchrate"), 1))
 end
 
 --//////////////////////////////////////////////////////--

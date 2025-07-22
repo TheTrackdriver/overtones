@@ -94,5 +94,4 @@ function Overtones.add_params()
   params:bang()
 end
 
- -- we return these engine-specific Lua functions back to the host script:
 return Overtones
