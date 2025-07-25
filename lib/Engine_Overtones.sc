@@ -1,59 +1,28 @@
 Engine_Overtones : CroneEngine {
 
 	classvar maxNumVoices = 8;
-	var voiceGroup;
-	var voiceList;
-
-	var lastFreq = 0;
-	var freq = 220;
-	var attack = 0.01;
-	var decay = 0.3;
-	var sustain = 0.7;
-	var release = 5;
-
-	var s11 = 1;
-	var s12 = 0;
-	var s13 = 0;
-	var s14 = 0;
-	var s15 = 0;
-	var s16 = 0;
-	var s17 = 0;
-	var s18 = 0;
-	var s21 = 0;
-	var s22 = 0;
-	var s23 = 0;
-	var s24 = 0;
-	var s25 = 0;
-	var s26 = 0;
-	var s27 = 0;
-	var s28 = 0;
-	var s31 = 0;
-	var s32 = 0;
-	var s33 = 0;
-	var s34 = 0;
-	var s35 = 0;
-	var s36 = 0;
-	var s37 = 0;
-	var s38 = 0;
-	var s41 = 0;
-	var s42 = 0;
-	var s43 = 0;
-	var s44 = 0;
-	var s45 = 0;
-	var s46 = 0;
-	var s47 = 0;
-	var s48 = 0;
-
-	var morphMixVal = 0;
-	var morphRate = 4;
-	var morphStart = 0;
-	var morphEnd = 3;
-	var pitchmod = 0;
-	var pitchrate = 4;
-	var panwidth = 0;
-	var panrate = 8;
-	var gate = 1;
-	var amp = 0.75;
+	var voiceGroup,
+	voiceList,
+	lastFreq = 0,
+	freq = 220,
+	attack = 0.01,
+	decay = 0.3,
+	sustain = 0.7,
+	release = 5,
+	s11 = 1, s12 = 0, s13 = 0, s14 = 0, s15 = 0, s16 = 0, s17 = 0, s18 = 0,
+	s21 = 0, s22 = 0, s23 = 0, s24 = 0, s25 = 0, s26 = 0, s27 = 0, s28 = 0,
+	s31 = 0, s32 = 0, s33 = 0, s34 = 0, s35 = 0, s36 = 0, s37 = 0, s38 = 0,
+	s41 = 0, s42 = 0, s43 = 0, s44 = 0, s45 = 0, s46 = 0, s47 = 0, s48 = 0,
+	morphMixVal = 0,
+	morphRate = 4,
+	morphStart = 0,
+	morphEnd = 3,
+	pitchmod = 0,
+	pitchrate = 4,
+	panwidth = 0,
+	panrate = 8,
+	gate = 1,
+	amp = 0.75;
 
 	*new { arg context, doneCallback;
 		^super.new(context, doneCallback);
@@ -90,23 +59,6 @@ Engine_Overtones : CroneEngine {
 
 			var sinebank = 0,
 			oscPresets,
-			oscPresets1,
-			oscPresets2,
-			oscPresets3,
-			oscPresets4,
-			oscPresets5,
-			oscPresets6,
-			oscPresets7,
-			oscPresets8,
-			ampMorph,
-			ampMorph1,
-			ampMorph2,
-			ampMorph3,
-			ampMorph4,
-			ampMorph5,
-			ampMorph6,
-			ampMorph7,
-			ampMorph8,
 			morphLfo,
 			morphRand,
 			morphEnv,
@@ -116,19 +68,7 @@ Engine_Overtones : CroneEngine {
 			signal;
 
 			// 8 arrays with 4 elements. The elements are snapshots of a value controlling one oscillators volume.
-			// The arrays are then collected in a new array:
-			oscPresets1 = [ s11, s21, s31, s41 ];
-			oscPresets2 = [ s12, s22, s32, s42 ];
-			oscPresets3 = [ s13, s23, s33, s43 ];
-			oscPresets4 = [ s14, s24, s34, s44 ];
-			oscPresets5 = [ s15, s25, s35, s45 ];
-			oscPresets6 = [ s16, s26, s36, s46 ];
-			oscPresets7 = [ s17, s27, s37, s47 ];
-			oscPresets8 = [ s18, s28, s38, s48 ];
-			oscPresets = [ oscPresets1, oscPresets2, oscPresets3, oscPresets4, oscPresets5, oscPresets6, oscPresets7, oscPresets8 ];
-
-			// Partial volume controls, one for each partial:
-			ampMorph = [ ampMorph1, ampMorph2, ampMorph3, ampMorph4, ampMorph5, ampMorph6, ampMorph7, ampMorph8 ];
+			oscPresets = [ [ s11, s21, s31, s41 ], [ s12, s22, s32, s42 ], [ s13, s23, s33, s43 ], [ s14, s24, s34, s44 ], [ s15, s25, s35, s45 ], [ s16, s26, s36, s46 ], [ s17, s27, s37, s47 ], [ s18, s28, s38, s48 ] ];
 
 			// 3 types of morphing:
 			morphLfo = LFTri.kr( freq: 1 / morphRate, iphase: 3, mul: 1.0 ).range(morphStart, morphEnd );
@@ -143,11 +83,8 @@ Engine_Overtones : CroneEngine {
 				arg i;
 				var sine;
 
-				// Morph up to four snapshots inside every oscPreset:
-				ampMorph[i] = LinSelectX.kr( clippedMorph, oscPresets[i] );
-
 				//Sinebank with 8 oscillators:
-				sine = Pan2.ar(SinOsc.ar( freq: ( freq * ( i + 1 ) ) + LFNoise1.kr(pitchrate).range(pitchmod * -1, pitchmod) ,mul: ampMorph[i] ), LFNoise1.kr(panrate).range(panwidth * -1, panwidth * 1 ) );
+				sine = Pan2.ar(SinOsc.ar( freq: ( freq * ( i + 1 ) ) + LFNoise1.kr(pitchrate).range(pitchmod * -1, pitchmod), mul: LinSelectX.kr( clippedMorph, oscPresets[i] ) ), LFNoise1.kr(panrate).range(panwidth * -1, panwidth * 1 ) );
 				sinebank = sinebank + sine;
 			};
 
