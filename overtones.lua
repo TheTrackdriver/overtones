@@ -1,4 +1,6 @@
 -- overtones
+-- v1.0.0 @author
+-- llllllll.co/t/??????
 --
 -- an additive synthesizer with
 -- eight partials and four
@@ -10,7 +12,7 @@
 -- k2 and k3 steps through
 -- five sections.
 --
--- section 1
+-- section 1 & 5
 --   e1: snapshot selection
 --   e2: partial selection
 --   e3: partial level
@@ -21,13 +23,6 @@
 --   e1: main level
 --   e2: parameter selection
 --   e3: parameter control
---
--- section 5 (for evaluation)
---   e1: snapshot selection
---   e2: partial selection
---   e3: partial level
---   k1+k2: copy snapshot
---   k1+k3: paste snapshot
 --
 -- midi device and midi channel
 -- can be set in parameters>edit
