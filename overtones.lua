@@ -1,5 +1,5 @@
 -- overtones
--- v1.0.0 @author
+-- v1.1.0 @author
 -- llllllll.co/t/??????
 --
 -- an additive synthesizer with
