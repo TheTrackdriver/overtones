@@ -52,4 +52,4 @@ Fine tuning:
   
 ![section4](monome_grid_3.png)  
   
-The monome grid has limited resolution so any adjustments are quite course. Fine tuning is possible while holding down the shift key and pressing keys on a slider. The 4 upper keys increments and the 4 lower keys decrements. Pressing keys further away from the vertical center makes the increments/decrements larger.
+The monome grid has limited resolution so any adjustments are quite course. Fine tuning is possible while holding down the shift key and pressing keys on a slider. The 4 upper keys increments and the 4 lower keys decrements the value. Pressing keys further away from the vertical center increases the step size.
