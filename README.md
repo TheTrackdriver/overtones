@@ -8,7 +8,7 @@ Section 1:
   
 This is where waveforms are created. Use **e1** to select 1 of 4 snapshots which are represented by the outlined boxes in the middle of the screen. The selected snapshot is highlighted. Use **e2** to move the cursor at the bottom which selects 1 of the 8 partials to edit. Use **e3** to adjust the volume of the selected partial.
 
-**k1** + **k2** will copy the currently selected snapshot. **k1** + **k3** will paste it into another selected snapshot. The memory will be overwritten if another snapshot is copied and deleted if the script has been reloaded.
+**k1** + **k2** will copy the currently selected snapshot. **k1** + **k3** will paste it into another selected snapshot. The buffer will be overwritten if another snapshot is copied and deleted if the script has been reloaded.
 
 Tip:  
 The snapshot remains in memory even after another PSET has been loaded. This makes it possible to transfer a waveform from one PSET to another.
