@@ -21,7 +21,7 @@ SECTION 2:
 These are the morph parameters. The arrows show the start (left) and end (right) point while the dimly lit boxes represent the snapshots. Use **e2** to select a parameter to edit and **e3** to adjust it. *start* sets the beginning of the morph. *end* sets either the turning point of the morph or the end of it depending on the next parameter. *l>r>e* stands for *(l)fo to (r)andom to (e)nvelope*. The *lfo* morphs from the start to the end point and then back again in reversed order continuously, *random* morphs randomly within the set range and the *envelope* morphs from the start to the end point where it stays for as long as a note is sustained. *rate* sets the speed of the morph. Use **e1** to adjust the main volume (a pop-up screen will show the value).
 
 Tip 1:  
-Setting the start and end point in the opposite direction will reverse the morph. This is mostly useful when the *envelope* is selected as the morph method.
+Setting the start and end point in the opposite direction will reverse the morph.
 
 Tip 2:  
 Setting the start and end parameters to the same point will freeze the morph. This is useful for drones.
