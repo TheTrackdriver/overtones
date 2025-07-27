@@ -41,7 +41,9 @@ This section shows all 4 snapshots on the same screen. All tools that are availa
 
 monome grid layout
 Page 1:  
+  
 ![section4](monome_grid_1.png)  
   
 Page 2:  
+  
 ![section4](monome_grid_2.png)
