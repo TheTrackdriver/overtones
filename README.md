@@ -1,5 +1,5 @@
 # overtones
-*overtones* is a script based on additive synthesis. It’s easy to program and made for atmospheric, evolving digital soundscapes and other types of artificial sounds. There are 8 partials and 4 snapshots. Each snapshot contains a complete waveform, and they are morphed into each other using 3 different methods. The user interface has 5 sections of parameters. Use **k2** and **k3** to step through them.
+**overtones** is a script based on additive synthesis. It’s easy to program and made for atmospheric, evolving digital soundscapes and other types of artificial sounds. There are 8 partials and 4 snapshots. Each snapshot contains a complete waveform, and they are morphed into each other using 3 different methods. The user interface has 5 sections of parameters. Use **k2** and **k3** to step through them.
 
 A midi keyboard is required for this script. A monome grid and/or MIDI controller is optional. MIDI in device and channel can be set in PARAMETERS>EDIT.
 
@@ -16,7 +16,7 @@ The snapshot remains in memory even after another PSET has been loaded. This mak
 Section 2:  
 ![section2](overtones_section2.png)  
   
-These are the morph parameters. The arrows show the start (left) and end (right) point while the dimly lit boxes represent the snapshots. Use **e2** to select a parameter to edit and **e3** to adjust it. *start* sets the beginning of the morph. *end* sets either the turning point of the morph or the end of it depending on the next parameter. *l>r>e* stands for *(l)fo to (r)andom to (e)nvelope*. The *lfo* morphs from the start to the end point and then back again in reversed order continuously, *random* morphs randomly within the set range and the *envelope* morphs from the start to the end point where it stays for as long as a note is sustained. *rate* sets the speed of the morph. Use **e1** to adjust the main volume (a pop-up screen will show the value).
+These are the morph parameters. The arrows show the start (left) and end (right) point while the dimly lit boxes represent the snapshots. Use **e2** to select a parameter to edit and **e3** to adjust it. **start** sets the beginning of the morph. **end** sets either the turning point of the morph or the end of it depending on the next parameter. **l>r>e** stands for **l**fo to **r**andom to **e**nvelope*. The **lfo** morphs from the start to the end point and then back again in reversed order continuously, **random** morphs randomly within the set range and the **envelope** morphs from the start to the end point where it stays for as long as a note is sustained. **rate** sets the speed of the morph. Use **e1** to adjust the main volume (a pop-up screen will show the value).
 
 Tip 1:  
 Setting the start and end point in the opposite direction will reverse the morph.
@@ -32,7 +32,7 @@ The ADSR envelope controls the overall volume. Use **e2** to select a parameter 
 Section 4:  
 ![section4](overtones_section4.png)  
   
-*width* spreads out the partials in the stereo field. They are constantly panned randomly, and *rate* sets the speed. *w&f* adds random pitch fluctuations and sets the modulation depth. *rate* sets the speed. Use **e2** to select a parameter and **e3** to adjust it. Use e1 to adjust the main volume.
+**width** spreads out the partials in the stereo field. They are constantly panned randomly, and **rate** sets the speed. **w&f** adds random pitch fluctuations and sets the modulation depth. **rate** sets the speed. Use **e2** to select a parameter and **e3** to adjust it. Use **e1** to adjust the main volume.
 
 Section 5:  
 ![section5](overtones_section5.png)  
