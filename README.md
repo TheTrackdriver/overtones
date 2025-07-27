@@ -3,7 +3,7 @@ overtones is a script based on additive synthesis. it’s easy to program and ma
 
 a midi keyboard is required for this script. a grid and/or midi controller is optional. midi in device and channel can be set in parameters>edit.
 
-section 1:
+section 1:  
 ![](overtones_section1.png)
 this is where waveforms are created. use e1 to select 1 of 4 snapshots which are represented by the empty boxes in the middle of the screen. the selected snapshot is filled. use e2 to move the cursor at the bottom which selects 1 of the 8 partials to edit. use e3 to adjust the volume of the selected partial.
 
