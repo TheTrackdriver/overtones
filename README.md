@@ -1,9 +1,8 @@
 # overtones
 overtones is a script based on additive synthesis. it’s easy to program and made for atmospheric, evolving digital soundscapes and other types of artificial sounds. there are 8 partials and 4 snapshots. each snapshot contains a complete waveform, and they are morphed into each other using 3 different methods. the user interface has 5 sections of parameters. use **k2** and **k3** to step through them.
 
-a midi keyboard is required for this script. a grid and/or midi controller is optional. midi in device and channel can be set in parameters>edit.  
-  
-  
+a midi keyboard is required for this script. a grid and/or midi controller is optional. midi in device and channel can be set in parameters>edit.
+
 section 1:  
   
 ![section1](overtones_section1.png)  
@@ -13,9 +12,8 @@ this is where waveforms are created. use **e1** to select 1 of 4 snapshots which
 **k1** + **k2** will copy the currently selected snapshot. **k1** + **k3** will paste it into another selected snapshot. the memory will be overwritten if another snapshot is copied and deleted if the script has been reloaded.
 
 tip:  
-the snapshot remains in memory even after another pset has been loaded. this makes it possible to transfer a waveform from one pset to another.  
-  
-  
+the snapshot remains in memory even after another pset has been loaded. this makes it possible to transfer a waveform from one pset to another.
+
 section 2:  
   
 ![section2](overtones_section2.png)  
@@ -26,23 +24,20 @@ tip 1:
 setting the start and end point in the opposite direction will reverse the morph. this is probably only useful when the envelope is selected as the morph method.
 
 tip 2:  
-setting the start and end parameter to the same point will freeze the morph. this could be useful for drones.  
-  
-  
+setting the start and end parameter to the same point will freeze the morph. this could be useful for drones.
+
 section 3:  
   
 ![section3](overtones_section3.png)  
   
-the adsr envelope controls the overall volume. use **e2** to select a parameter and **e3** to adjust it. use **e1** to adjust the main volume.  
-  
-  
+the adsr envelope controls the overall volume. use **e2** to select a parameter and **e3** to adjust it. use **e1** to adjust the main volume.
+
 section 4:  
   
 ![section4](overtones_section4.png)  
   
-*“width”* spreads out the partials in the stereo field. they are constantly panned randomly, and *“rate”* sets the speed. *“w&f”* adds random pitch fluctuations and sets the modulation depth. *“rate”* sets the speed. use **e2** to select a parameter and **e3** to adjust it. use e1 to adjust the main volume.  
-  
-  
+*“width”* spreads out the partials in the stereo field. they are constantly panned randomly, and *“rate”* sets the speed. *“w&f”* adds random pitch fluctuations and sets the modulation depth. *“rate”* sets the speed. use **e2** to select a parameter and **e3** to adjust it. use e1 to adjust the main volume.
+
 section 5:  
   
 ![section5](overtones_section5.png)  
