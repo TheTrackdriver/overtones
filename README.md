@@ -1,7 +1,7 @@
 # overtones
 *overtones* is a script based on additive synthesis. It’s easy to program and made for atmospheric, evolving digital soundscapes and other types of artificial sounds. There are 8 partials and 4 snapshots. Each snapshot contains a complete waveform, and they are morphed into each other using 3 different methods. The user interface has 5 sections of parameters. Use **k2** and **k3** to step through them.
 
-A midi keyboard is required for this script. A grid and/or MIDI controller is optional. MIDI in device and channel can be set in PARAMETERS>EDIT.
+A midi keyboard is required for this script. A monome grid and/or MIDI controller is optional. MIDI in device and channel can be set in PARAMETERS>EDIT.
 
 Section 1:  
 ![section1](overtones_section1.png)  
