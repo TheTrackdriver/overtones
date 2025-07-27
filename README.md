@@ -38,3 +38,14 @@ Section 5:
 ![section5](overtones_section5.png)  
   
 This section shows all 4 snapshots on the same screen. All tools that are available in section 1 are here as well, including the possibility to copy and paste snapshots. The first number in the top right corner shows the selected snapshot (the corresponding number that begins each row of partials is highlighted), the second the partial and the third below the others the volume. The circle marks the selected partial.
+
+monome grid
+Page 1:  
+![section4](monome_grid_1.png)  
+
+fjdskldfj
+
+Page 2:  
+![section4](monome_grid_2.png)  
+
+asdgaksldjk
