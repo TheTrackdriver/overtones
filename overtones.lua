@@ -1,5 +1,5 @@
 -- overtones
--- v1.0.1 @author
+-- v1.0.1 @trackdriver
 -- llllllll.co/t/??????
 --
 -- an additive synthesizer with
