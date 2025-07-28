@@ -3,4 +3,4 @@
 
 A midi keyboard is required for this script. A monome 128 grid and/or MIDI controller is optional. MIDI in device and channel can be set in PARAMETERS>EDIT.  
   
-![overtones](/manual/overtones_section1.png)
+![overtones](overtones_section1.png)
