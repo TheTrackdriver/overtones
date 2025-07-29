@@ -3,11 +3,11 @@
 
 a midi keyboard is required for this script. a monome grid and/or midi controller is optional. midi in device and channel can be set in PARAMETERS>EDIT.
 
-[Download the manual](/manual/overtones%20manual.pdf) or continue reading.
+[Download the manual](/doc/overtones%20manual.pdf) or continue reading.
 
 ### section 1:  
   
-![overtones](/manual/cover.png)  
+![overtones](/doc/cover.png)  
   
 this is where waveforms are created. use **e1** to select 1 of 4 snapshots which are represented by the outlined boxes in the middle of the screen. the selected snapshot is highlighted. use **e2** to move the cursor at the bottom which selects 1 of the 8 partials to edit. use **e3** to adjust the volume of the selected partial.
 
@@ -18,7 +18,7 @@ the snapshot remains in memory even after another PSET has been loaded. this mak
 
 ### section 2:  
   
-![overtones](/manual/overtones_section2.png)  
+![overtones](/doc/overtones_section2.png)  
   
 these are the morph parameters. the arrows show the start (left) and end (right) point while the dimly lit boxes represent the snapshots. use **e2** to select a parameter to edit and **e3** to adjust it. **start** sets the beginning of the morph. **end** sets either the turning point of the morph or the end of it depending on the next parameter. **l>r>e** stands for (**l**)fo to (**r**)andom to (**e**)nvelope. the lfo morphs from the start to the end point and then back again in reversed order continuously, random morphs randomly within the set range and the envelope morphs from the start to the end point where it stays for as long as a note is sustained. **rate** sets the speed of the morph. use **e1** to adjust the main volume (a pop-up screen will show the value).
 
@@ -30,19 +30,19 @@ setting the start and end parameters to the same point will freeze the morph. th
 
 ### section 3:  
   
-![overtones](/manual/overtones_section3.png)  
+![overtones](/doc/overtones_section3.png)  
   
 the adsr envelope controls the overall volume. use **e2** to select a parameter and **e3** to adjust it. use **e1** to adjust the main volume.
 
 ### section 4:  
   
-![overtones](/manual/overtones_section4.png)  
+![overtones](/doc/overtones_section4.png)  
   
 **width** spreads out the partials in the stereo field. they are constantly panned randomly, and **rate** sets the speed. **w&f** adds random pitch fluctuations and sets the modulation depth. **rate** sets the speed. use **e2** to select a parameter and **e3** to adjust it. use **e1** to adjust the main volume.
 
 ### section 5:  
   
-![overtones](/manual/overtones_section5.png)  
+![overtones](/doc/overtones_section5.png)  
   
 this section shows all 4 snapshots on the same screen. all tools that are available in section 1 are here as well, including the possibility to copy and paste snapshots. the first number in the top right corner shows the selected snapshot (the corresponding number that begins each row of partials is highlighted), the second the partial and the third below the others the volume. the circle marks the selected partial.
 
@@ -52,13 +52,13 @@ all parameters are mapped on an 8x16 grid on 2 pages. the leds are updated whene
 
 ### page 1:  
   
-![overtones](/manual/monome_grid_1.png)  
+![overtones](/doc/monome_grid_1.png)  
   
 ### page 2:  
   
-![overtones](/manual/monome_grid_2.png)  
+![overtones](/doc/monome_grid_2.png)  
   
 ### fine tuning:  
 the 128 grid has a limited resolution with its 8 keys/column. the step size on a slider is therefor quite large. however, fine tuning is possible by holding down the shift key and pressing keys on a slider. the 4 upper keys increments, and the 4 lower keys decrements the value. pressing keys further away from the vertical centre increases the step size. a popup window on the norns screen will show which parameter that has been changed in conjunction with the value.  
   
-![overtones](/manual/monome_grid_3.png)
+![overtones](/doc/monome_grid_3.png)
