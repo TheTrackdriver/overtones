@@ -25,7 +25,8 @@
 --   e3: parameter control
 --
 -- midi device and midi channel
--- can be set in PARAMETERS>EDIT
+-- can be set in
+-- PARAMETERS>EDIT
 --
 --
 --
