@@ -1,6 +1,6 @@
 -- overtones
 -- v1.0.1 @trackdriver
--- llllllll.co/t/??????
+-- https://llllllll.co/t/overtones
 --
 -- an additive synthesizer with
 -- eight partials and four
@@ -25,7 +25,7 @@
 --   e3: parameter control
 --
 -- midi device and midi channel
--- can be set in parameters>edit
+-- can be set in PARAMETERS>EDIT
 --
 --
 --
